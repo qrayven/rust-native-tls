@@ -326,6 +326,7 @@ pub struct TlsConnectorBuilder {
     root_certificates: Vec<Certificate>,
     accept_invalid_certs: bool,
     accept_invalid_hostnames: bool,
+    cipher_suites: Option<String>,
     use_sni: bool,
 }
 
@@ -333,6 +334,14 @@ impl TlsConnectorBuilder {
     /// Sets the identity to be used for client certificate authentication.
     pub fn identity(&mut self, identity: Identity) -> &mut TlsConnectorBuilder {
         self.identity = Some(identity);
+        self
+    }
+
+    /// Sets allowed cipher suites. If specified `min_protocol_version` and
+    /// `max_protocol` version are ignored this is only for case when OpenSSL is being used
+    #[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "ios")))]
+    pub fn set_cipher_list(&mut self, suites: String) -> &mut TlsConnectorBuilder {
+        self.cipher_suites = Some(suites);
         self
     }
 
@@ -454,6 +463,7 @@ impl TlsConnector {
             use_sni: true,
             accept_invalid_certs: false,
             accept_invalid_hostnames: false,
+            cipher_suites: None,
         }
     }
 
