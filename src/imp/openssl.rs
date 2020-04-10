@@ -9,7 +9,7 @@ use self::openssl::ssl::{
     self, MidHandshakeSslStream, SslAcceptor, SslConnector, SslContextBuilder, SslMethod,
     SslVerifyMode,
 };
-use self::openssl::x509::{X509, X509VerifyResult};
+use self::openssl::x509::{X509VerifyResult, X509};
 use std::error;
 use std::fmt;
 use std::io;
@@ -261,7 +261,14 @@ impl TlsConnector {
             }
         }
         supported_protocols(builder.min_protocol, builder.max_protocol, &mut connector)?;
-
+        if let Some(ref ciphers) = builder.cipher_suites {
+            // we should cut off all ciphers reserverd for tls1.3
+            connector.set_cipher_list(ciphers)?;
+            #[cfg(ossl111)]
+            connector.set_ciphersuites(
+                "TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_256_GCM_SHA384",
+            )?;
+        }
         for cert in &builder.root_certificates {
             if let Err(err) = connector.cert_store_mut().add_cert((cert.0).0.clone()) {
                 debug!("add_cert error: {:?}", err);
