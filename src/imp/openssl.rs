@@ -7,8 +7,9 @@ use self::openssl::nid::Nid;
 use self::openssl::pkcs12::{ParsedPkcs12, Pkcs12};
 use self::openssl::ssl::{
     self, MidHandshakeSslStream, SslAcceptor, SslConnector, SslContextBuilder, SslMethod,
-    SslVerifyMode,
+    SslOptions, SslVerifyMode,
 };
+
 use self::openssl::x509::{X509VerifyResult, X509};
 use std::error;
 use std::fmt;
@@ -269,6 +270,9 @@ impl TlsConnector {
                 "TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_256_GCM_SHA384",
             )?;
         }
+        // disable renegotiation
+        #[cfg(ossl110h)]
+        connector.set_options(SslOptions::NO_RENEGOTIATION)?;
         for cert in &builder.root_certificates {
             if let Err(err) = connector.cert_store_mut().add_cert((cert.0).0.clone()) {
                 debug!("add_cert error: {:?}", err);
