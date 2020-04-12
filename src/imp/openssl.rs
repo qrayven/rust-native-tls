@@ -270,9 +270,16 @@ impl TlsConnector {
                 "TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_256_GCM_SHA384",
             )?;
         }
-        connector.set_options(SslOptions::NO_SESSION_RESUMPTION_ON_RENEGOTIATION);
+        println!(
+            "{:?}",
+            connector.set_options(SslOptions::NO_SESSION_RESUMPTION_ON_RENEGOTIATION)
+        );
+        println!(
+            "{:?}",
+            connector.set_options(SslOptions::ALLOW_UNSAFE_LEGACY_RENEGOTIATION)
+        );
         #[cfg(any(ossl111, ossl110h))]
-        connector.set_options(SslOptions::NO_RENEGOTIATION);
+        println!("{:?}", connector.set_options(SslOptions::NO_RENEGOTIATION));
         // disable renegotiation
         for cert in &builder.root_certificates {
             if let Err(err) = connector.cert_store_mut().add_cert((cert.0).0.clone()) {
