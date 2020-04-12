@@ -278,6 +278,7 @@ impl TlsConnector {
             "{:?}",
             connector.set_options(SslOptions::ALLOW_UNSAFE_LEGACY_RENEGOTIATION)
         );
+        println!("{:?}", connector.set_options(SslOptions::NO_TLSV1));
         #[cfg(any(ossl111, ossl110h))]
         println!("{:?}", connector.set_options(SslOptions::NO_RENEGOTIATION));
         // disable renegotiation
